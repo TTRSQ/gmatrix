@@ -27,6 +27,14 @@ func NewMatrix(r, c int, datas []float64) (*Matrix, error) {
 	}, nil
 }
 
+func (m *Matrix) R() int {
+	return m.rowNum
+}
+
+func (m *Matrix) C() int {
+	return m.colNum
+}
+
 func (ma *Matrix) Add(mb *Matrix) (*Matrix, error) {
 	isSame := ma.sameShape(mb)
 	if !isSame {
