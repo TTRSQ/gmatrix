@@ -1,6 +1,9 @@
 package gmatrix
 
-import "errors"
+import (
+	"errors"
+	"math/rand"
+)
 
 type Matrix struct {
 	rowNum int
@@ -80,6 +83,38 @@ func (ma *Matrix) Mul(mb *Matrix) (*Matrix, error) {
 	}
 
 	return NewMatrix(newR, newC, newDatas)
+}
+
+func (ma *Matrix) Mean(mb *Matrix) (*Matrix, error) {
+	isSame := ma.sameShape(mb)
+	if !isSame {
+		return nil, errors.New("matrix different shape")
+	}
+	datas := []float64{}
+	for i := range ma.datas {
+		datas = append(datas, (ma.datas[i]+mb.datas[i])/2)
+	}
+	return NewMatrix(ma.rowNum, ma.colNum, datas)
+}
+
+func (ma *Matrix) RandMerge(mb *Matrix, orgRate float64) (*Matrix, error) {
+	if orgRate < 0 || 1 < orgRate {
+		return nil, errors.New("invalid rate range")
+	}
+	isSame := ma.sameShape(mb)
+	if !isSame {
+		return nil, errors.New("matrix different shape")
+	}
+	datas := []float64{}
+	for i := range ma.datas {
+		randf := rand.Float64()
+		if randf < orgRate {
+			datas = append(datas, ma.datas[i])
+		} else {
+			datas = append(datas, mb.datas[i])
+		}
+	}
+	return NewMatrix(ma.rowNum, ma.colNum, datas)
 }
 
 func (m *Matrix) Func(f func(float64) (float64, error)) (*Matrix, error) {
