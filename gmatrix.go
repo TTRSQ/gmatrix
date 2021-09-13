@@ -129,6 +129,14 @@ func (m *Matrix) Func(f func(float64) (float64, error)) (*Matrix, error) {
 	return NewMatrix(m.rowNum, m.colNum, datas)
 }
 
+func (m *Matrix) Datas() []float64 {
+	datas := []float64{}
+	for i := range m.datas {
+		datas = append(datas, m.datas[i])
+	}
+	return datas
+}
+
 func (ma *Matrix) sameShape(mb *Matrix) bool {
 	return ma.colNum == mb.colNum && ma.rowNum == mb.rowNum
 }
