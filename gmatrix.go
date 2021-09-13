@@ -124,7 +124,6 @@ func (m *Matrix) Func(f func(float64) (float64, error)) (*Matrix, error) {
 		if err != nil {
 			return nil, err
 		}
-		m.datas[i] = val
 		datas = append(datas, val)
 	}
 	return NewMatrix(m.rowNum, m.colNum, datas)
