@@ -27,31 +27,33 @@ func NewMatrix(r, c int, datas []float64) (*Matrix, error) {
 	}, nil
 }
 
-func (ma *Matrix) Add(mb *Matrix) error {
+func (ma *Matrix) Add(mb *Matrix) (*Matrix, error) {
 	isSame := ma.sameShape(mb)
 	if !isSame {
-		return errors.New("matrix different shape")
+		return nil, errors.New("matrix different shape")
 	}
+	datas := []float64{}
 	for i := range ma.datas {
-		ma.datas[i] += mb.datas[i]
+		datas = append(datas, ma.datas[i]+mb.datas[i])
 	}
-	return nil
+	return NewMatrix(ma.rowNum, ma.colNum, datas)
 }
 
-func (ma *Matrix) Sub(mb *Matrix) error {
+func (ma *Matrix) Sub(mb *Matrix) (*Matrix, error) {
 	isSame := ma.sameShape(mb)
 	if !isSame {
-		return errors.New("matrix different shape")
+		return nil, errors.New("matrix different shape")
 	}
+	datas := []float64{}
 	for i := range ma.datas {
-		ma.datas[i] -= mb.datas[i]
+		datas = append(datas, ma.datas[i]-mb.datas[i])
 	}
-	return nil
+	return NewMatrix(ma.rowNum, ma.colNum, datas)
 }
 
-func (ma *Matrix) Mul(mb *Matrix) error {
+func (ma *Matrix) Mul(mb *Matrix) (*Matrix, error) {
 	if ma.colNum != mb.rowNum {
-		return errors.New("invalid shape")
+		return nil, errors.New("invalid shape")
 	}
 	newR := ma.rowNum
 	newC := mb.colNum
@@ -69,22 +71,20 @@ func (ma *Matrix) Mul(mb *Matrix) error {
 		}
 	}
 
-	ma.rowNum = newR
-	ma.colNum = newC
-	ma.datas = newDatas
-
-	return nil
+	return NewMatrix(newR, newC, newDatas)
 }
 
-func (m *Matrix) Func(f func(float64) (float64, error)) error {
+func (m *Matrix) Func(f func(float64) (float64, error)) (*Matrix, error) {
+	datas := []float64{}
 	for i := range m.datas {
 		val, err := f(m.datas[i])
 		if err != nil {
-			return err
+			return nil, err
 		}
 		m.datas[i] = val
+		datas = append(datas, val)
 	}
-	return nil
+	return NewMatrix(m.rowNum, m.colNum, datas)
 }
 
 func (ma *Matrix) sameShape(mb *Matrix) bool {
