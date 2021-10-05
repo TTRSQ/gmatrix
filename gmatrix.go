@@ -94,17 +94,31 @@ func (ma *Matrix) MulParallel(mb *Matrix) (*Matrix, error) {
 	newDatas := make([]float64, newR*newC)
 
 	common := ma.colNum
+	type ret struct {
+		idx int
+		val float64
+	}
+	channel := make(chan ret, newR*newC)
 
 	for r := 0; r < newR; r++ {
 		for c := 0; c < newC; c++ {
-			go func(row, col int) {
+			go func(row, col int, ch chan ret) {
 				sum := 0.0
 				for com := 0; com < common; com++ {
 					sum += ma.datas[row*common+com] * mb.datas[com*newC+col]
 				}
 				newDatas[col+row*newC] = sum
-			}(r, c)
+				ch <- ret{
+					idx: col + row*newC,
+					val: sum,
+				}
+			}(r, c, channel)
 		}
+	}
+
+	for i := 0; i < newR*newC; i++ {
+		item := <-channel
+		newDatas[item.idx] = item.val
 	}
 
 	return NewMatrix(newR, newC, newDatas)
