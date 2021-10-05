@@ -85,6 +85,31 @@ func (ma *Matrix) Mul(mb *Matrix) (*Matrix, error) {
 	return NewMatrix(newR, newC, newDatas)
 }
 
+func (ma *Matrix) MulParallel(mb *Matrix) (*Matrix, error) {
+	if ma.colNum != mb.rowNum {
+		return nil, errors.New("invalid shape")
+	}
+	newR := ma.rowNum
+	newC := mb.colNum
+	newDatas := make([]float64, newR*newC)
+
+	common := ma.colNum
+
+	for r := 0; r < newR; r++ {
+		for c := 0; c < newC; c++ {
+			go func(row, col int) {
+				sum := 0.0
+				for com := 0; com < common; com++ {
+					sum += ma.datas[row*common+com] * mb.datas[com*newC+col]
+				}
+				newDatas[col+row*newC] = sum
+			}(r, c)
+		}
+	}
+
+	return NewMatrix(newR, newC, newDatas)
+}
+
 func (ma *Matrix) Mean(mb *Matrix) (*Matrix, error) {
 	isSame := ma.sameShape(mb)
 	if !isSame {
